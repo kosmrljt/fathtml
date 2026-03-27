@@ -253,6 +253,6 @@ rm -rf report_files/
 
 ## Project
 
-- **Author**: Vibe-coded with [Claude](https://claude.ai) (Anthropic)
+- **Author**: Vibe-coded with Claude then audited and tested
 - **License**: MIT
 - **Contributions**: Issues, PRs, and ideas are welcome.
