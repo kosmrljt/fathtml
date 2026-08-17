@@ -21,7 +21,7 @@ quarto render "$FILE"
 
 echo ""
 echo "=== 2/2: Embedding resources into HTML ==="
-python3 solidhtml.py "${BASE}.html" "$@"
+python3 fathtml.py "${BASE}.html" "$@"
 
 echo ""
 if [ -d "${BASE}_files" ]; then

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-solidhtml.py — Make any HTML file fully self-contained.
+bathtml.py — Make any HTML file fully self-contained.
 
 Embeds local resources (_files/), downloads CDN libraries, compresses,
 encrypts with AES-256-GCM, and adds expiry dates.
@@ -8,13 +8,13 @@ encrypts with AES-256-GCM, and adds expiry dates.
 Works with Quarto, Jupyter, R Markdown, or any HTML file.
 
 Usage:
-    python solidhtml.py report.html                                # embed local _files
-    python solidhtml.py report.html --fetch-external               # + CDN libraries
-    python solidhtml.py report.html --fetch-external --minify      # + CSS minification
-    python solidhtml.py report.html --compress                     # + gzip compression
-    python solidhtml.py report.html --password secret              # + AES-256-GCM encryption
-    python solidhtml.py report.html --password s --compress        # + encryption + compression
-    python solidhtml.py report.html --password s --expires 7d      # + expiry (requires password)
+    python bathtml.py report.html                                # embed local _files
+    python bathtml.py report.html --fetch-external               # + CDN libraries
+    python bathtml.py report.html --fetch-external --minify      # + CSS minification
+    python bathtml.py report.html --compress                     # + gzip compression
+    python bathtml.py report.html --password secret              # + AES-256-GCM encryption
+    python bathtml.py report.html --password s --compress        # + encryption + compression
+    python bathtml.py report.html --password s --expires 7d      # + expiry (requires password)
 
 Options:
     --fetch-external   Download external JS/CSS from CDN and embed inline
@@ -29,8 +29,6 @@ Requirements:
     Python 3.10+
     For --password: pip install cryptography  (or pycryptodome)
 
-Author: Vibe-coded with Claude (Anthropic) — github.com/kosmrljt/solidhtml
-License: MIT
 """
 
 import sys
@@ -94,7 +92,7 @@ def fetch_url(url: str, timeout: int = 60) -> str | None:
 
     try:
         req = urllib.request.Request(url, headers={
-            'User-Agent': 'Mozilla/5.0 solidhtml.py',
+            'User-Agent': 'Mozilla/5.0 bathtml.py',
             'Accept-Encoding': 'identity',  # Don't ask for gzip — we want raw text
         })
         with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -745,7 +743,7 @@ def embed_resources(html_path: str, fetch_external: bool = False,
     if expires_iso and not password:
         print(f"\n  ERROR: --expires requires --password")
         print(f"  Without encryption, expiry is trivially bypassed (visible in page source).")
-        print(f"  Use: python solidhtml.py {html_path} --password YOUR_PASSWORD --expires {expires}")
+        print(f"  Use: python bathtml.py {html_path} --password YOUR_PASSWORD --expires {expires}")
         sys.exit(1)
 
     if password:
@@ -793,14 +791,14 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python solidhtml.py report.html                                   # embed local _files
-  python solidhtml.py report.html --fetch-external                  # + download CDN libs
-  python solidhtml.py report.html --fetch-external --minify         # + minify CSS
-  python solidhtml.py report.html --compress                        # + gzip compression
-  python solidhtml.py report.html --password secret                 # + AES encryption
-  python solidhtml.py report.html --password secret --compress      # + encryption + compression
-  python solidhtml.py report.html --password s --expires 7d         # + expires in 7 days
-  python solidhtml.py report.html --password s --compress --expires 7d --no-print  # all options
+  python bathtml.py report.html                                   # embed local _files
+  python bathtml.py report.html --fetch-external                  # + download CDN libs
+  python bathtml.py report.html --fetch-external --minify         # + minify CSS
+  python bathtml.py report.html --compress                        # + gzip compression
+  python bathtml.py report.html --password secret                 # + AES encryption
+  python bathtml.py report.html --password secret --compress      # + encryption + compression
+  python bathtml.py report.html --password s --expires 7d         # + expires in 7 days
+  python bathtml.py report.html --password s --compress --expires 7d --no-print  # all options
         """)
 
     parser.add_argument('html_file',

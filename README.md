@@ -1,258 +1,212 @@
-<p align="center">
-  <h1 align="center">🧊 SolidHTML</h1>
-  <p align="center">
-    <strong>One HTML file. Everything inside. Nothing else needed.</strong>
-  </p>
-  <p align="center">
-    Embed all resources, compress, encrypt, and share — as a single .html file.
-  </p>
-</p>
+# fathtml
 
----
+**One HTML file. Everything inside. Nothing else needed.**
+
+Embed all resources, compress, encrypt, and share — as a single `.html` file.
 
 ## The Problem
 
-You've just created a beautiful data report with interactive Plotly charts, sortable DataTables, and matplotlib visualizations. You render it to HTML and get:
+You render an HTML report (Quarto, Jupyter, R Markdown) and get a directory full of dependencies:
 
 ```
 report.html
 report_files/
   ├── libs/
   │   ├── bootstrap/
-  │   ├── quarto-html/
-  │   └── ...
-  ├── figure-output/
-  │   ├── plot1.png
-  │   └── plot2.png
-  └── ...
+  │   └── quarto-html/
+  └── figure-output/
+      ├── plot1.png
+      └── plot2.png
 ```
 
-Now try sharing that. You need to zip the whole thing, the recipient needs to unzip it into the right structure, and if one file is missing — broken page. Or you try `embed-resources: true` in Quarto, but it [doesn't actually work](https://github.com/quarto-dev/quarto-cli/discussions/12315) half the time.
-
-**PDF?** Sure, but then you lose interactivity — no hovering over data points, no sortable tables, no expandable code blocks. Your beautiful interactive report becomes a flat screenshot.
+Sharing this requires zipping, and if one file is missing the page breaks. Quarto's `embed-resources: true` option doesn't always produce fully self-contained output ([quarto-cli#12315](https://github.com/quarto-dev/quarto-cli/discussions/12315)). PDF loses interactivity — no hovering over data points, no sortable tables.
 
 ## The Solution
 
-```bash
-python solidhtml.py report.html
+```
+python fathtml.py report.html
 ```
 
-Done. One file. Everything inside. Send it by email, Slack, Teams — just the `.html`. Open in any browser, works offline, no server needed.
+One file. Everything embedded. Send by email, Slack, Teams. Opens in any browser, works offline.
 
-## Why SolidHTML?
+## Features
 
-### 📦 True single-file HTML
-All CSS, JavaScript, images, and fonts are embedded directly in the HTML using inline `<style>`, `<script>`, and `data:` URIs. No `_files/` directory, no broken links, no zip files.
+**Single-file embedding** —
+All CSS, JavaScript, images, and fonts are embedded using inline `<style>`, `<script>`, and `data:` URIs. No `_files/` directory, no broken links.
 
-### 🗜️ Compression
-HTML reports with embedded Plotly.js can easily reach 5-10 MB. With `--compress`, gzip shrinks them by 50-70%, making them practical for email attachments.
+**Compression** —
+HTML with embedded Plotly.js can reach 5-10 MB. Gzip compression shrinks by 50-70%, making files practical for email.
 
-### 🔒 Real encryption
-AES-256-GCM encryption — the same standard used by banks and governments. Without the password, the content is mathematically inaccessible. Not "password-protected PDF" that anyone can crack in 30 seconds with free tools online.
+**Encryption** —
+AES-256-GCM with PBKDF2 key derivation (100,000 iterations). Decryption happens in the browser using the Web Crypto API — the recipient needs only a browser. Unlike PDF password protection, which relies on viewer compliance, this is cryptographic — without the password the content is inaccessible.
 
-### ⏰ Expiry dates
-Set documents to expire after a specific date or time period. The expiry is embedded inside the encrypted payload, so it can't be tampered with (requires `--password`).
+**Expiry dates** —
+Documents can expire after a date or time period. The expiry is inside the encrypted payload, so it cannot be modified without the password. Requires `--password`.
 
-### 📊 Better than PDF
-Your HTML is still a web page. JavaScript runs, charts are interactive, tables are sortable and searchable, code blocks are expandable. You get the portability of PDF with the functionality of a web app.
-
-### 🌐 Works with anything
-Not just Quarto — any HTML file. Jupyter notebook exports, R Markdown output, hand-written HTML, static site generator output. If it's HTML with external dependencies, SolidHTML can make it self-contained.
+**Works with any HTML** —
+Not limited to Quarto. Jupyter exports, R Markdown, hand-written HTML, static site generators — any HTML with external dependencies.
 
 ## Quick Start
 
 ### Installation
 
 ```bash
-# Download the script (it's a single file — that's the whole point)
-curl -O https://raw.githubusercontent.com/YOUR_USERNAME/solidhtml/main/solidhtml.py
+# Single file — download and use
+curl -O https://raw.githubusercontent.com/kosmrljt/fathtml/main/fathtml.py
 
-# Or clone the repo
-git clone https://github.com/YOUR_USERNAME/solidhtml.git
+# Or clone
+git clone https://github.com/kosmrljt/fathtml.git
 ```
 
-### Python Requirements
+### Requirements
 
-**Python 3.10+** (uses `X | Y` type union syntax)
+**Python 3.10+**
 
-**Core functionality** — no extra packages needed:
+Core functionality needs no extra packages. For encryption (`--password`):
+
 ```bash
-python solidhtml.py report.html                    # Just works
-python solidhtml.py report.html --compress         # Just works
-python solidhtml.py report.html --fetch-external   # Just works
+pip install cryptography      # or: pip install pycryptodome
 ```
 
-**For encryption** (`--password`) — install one of these:
+For Quarto workflow (optional):
+
 ```bash
-pip install cryptography      # Recommended (widely used, well-maintained)
-# or
-pip install pycryptodome      # Alternative
+pip install matplotlib plotly pandas jupyter
+# Quarto: https://quarto.org/docs/get-started/
 ```
 
-**For Quarto workflow** (optional — only if you render .py/.qmd files):
-```bash
-pip install matplotlib plotly pandas    # Your data science stack
-pip install jupyter                     # Quarto's Jupyter engine
-# Quarto itself: https://quarto.org/docs/get-started/
-```
-
-### Basic Usage
+### Usage
 
 ```bash
-# Embed local _files/ resources into HTML
-# (fixes Quarto's broken embed-resources)
-python solidhtml.py report.html
+# Embed local _files/ resources
+python fathtml.py report.html
 
-# Also download and embed CDN libraries (jQuery, Plotly, DataTables...)
-python solidhtml.py report.html --fetch-external
+# Also embed CDN libraries (jQuery, Plotly, DataTables...)
+python fathtml.py report.html --fetch-external
 
-# Compress (typically 50-70% smaller)
-python solidhtml.py report.html --compress
+# Compress (50-70% smaller)
+python fathtml.py report.html --compress
 
-# Encrypt with password
-python solidhtml.py report.html --password secret123
+# Encrypt
+python fathtml.py report.html --password secret123
 
 # Encrypt + compress + expire in 7 days
-python solidhtml.py report.html --password secret123 --compress --expires 7d
+python fathtml.py report.html --password secret123 --compress --expires 7d
 
-# Everything at once
-python solidhtml.py report.html --fetch-external --minify --compress \
+# All options
+python fathtml.py report.html --fetch-external --minify --compress \
     --password secret123 --expires 7d --no-print
 ```
 
 ### Quarto Workflow
 
-If you use Quarto to render `.py` or `.qmd` files, use the included `render.sh`:
+For `.py` or `.qmd` files, the included `render.sh` runs Quarto and fathtml in one step:
 
 ```bash
-# Render with Quarto + embed resources in one step
 ./render.sh report.py
-
-# Render + encrypt + compress
 ./render.sh report.py --password secret123 --compress --expires 7d
 ```
 
-`render.sh` runs `quarto render`, then `solidhtml.py`, then cleans up the `_files/` directory.
-
 ## Options
 
-| Option | Description |
-|---|---|
-| `--fetch-external` | Download external JS/CSS from CDN URLs and embed inline. Makes the HTML work completely offline |
-| `--minify` | Minify CSS (remove comments/whitespace). JS is intentionally left untouched — regex minification breaks libraries like Plotly |
-| `--compress` | Compress with gzip + base64. Output is a small bootstrap HTML that decompresses in the browser |
-| `--password PASS` | Encrypt with AES-256-GCM. Output shows a password prompt. Password can also be passed via URL: `file.html?key=secret` |
-| `--expires WHEN` | Set expiry date. **Requires `--password`** — without encryption, expiry is trivially bypassed. Formats: `7d`, `12h`, `30m`, `2025-12-31` |
-| `--no-print` | Hide content when printing (CSS `@media print` rule) |
-| `--keep-backup` | Save original file as `.html.bak` before overwriting |
+| Option             | Description                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| `--fetch-external` | Download external JS/CSS from CDN URLs and embed inline                                  |
+| `--minify`         | Minify CSS (JS is left untouched to avoid breaking minified libraries)                   |
+| `--compress`       | Gzip compress + base64, wrapped in a bootstrap page that decompresses in the browser     |
+| `--password PASS`  | AES-256-GCM encryption. Password can also be passed via URL: `file.html?key=secret`     |
+| `--expires WHEN`   | Set expiry. Requires `--password`. Formats: `7d`, `12h`, `30m`, `2025-12-31`             |
+| `--no-print`       | Hide content when printing (CSS `@media print`)                                          |
+| `--keep-backup`    | Save original as `.html.bak` before overwriting                                          |
 
 ## How It Works
 
-SolidHTML processes your HTML in up to 4 phases:
+fathtml processes HTML in up to 4 phases:
 
 ### Phase 1: Embed Local Resources
 
-Scans the HTML for references to the `_files/` directory and replaces them:
+Scans for references to `_files/` and replaces them:
 
-| What | Before | After |
-|---|---|---|
-| CSS | `<link href="report_files/libs/bootstrap.css">` | `<style>...inline CSS...</style>` |
-| JavaScript | `<script src="report_files/libs/quarto.js">` | `<script>...inline JS...</script>` |
-| Images | `<img src="report_files/figure/plot.png">` | `<img src="data:image/png;base64,...">` |
-| Fonts in CSS | `url(../fonts/icon.woff2)` | `url(data:font/woff2;base64,...)` |
+| Type         | Before                                          | After                                   |
+| ------------ | ----------------------------------------------- | --------------------------------------- |
+| CSS          | `<link href="report_files/libs/bootstrap.css">` | `<style>...inline CSS...</style>`       |
+| JavaScript   | `<script src="report_files/libs/quarto.js">`    | `<script>...inline JS...</script>`      |
+| Images       | `<img src="report_files/figure/plot.png">`      | `<img src="data:image/png;base64,...">` |
+| Fonts in CSS | `url(../fonts/icon.woff2)`                      | `url(data:font/woff2;base64,...)`       |
 
-### Phase 2: Embed External CDN Resources (`--fetch-external`)
+### Phase 2: External Resources (`--fetch-external`)
 
-Downloads CSS/JS from URLs like `https://cdn.datatables.net/...` and embeds them inline. Each URL is fetched only once (cached). Timeout is 120 seconds to handle large libraries like Plotly.js (~3.5 MB).
+Downloads CSS/JS from CDN URLs and embeds inline. Each URL is fetched once and cached. Timeout is 120s to handle large libraries like Plotly.js (~3.5 MB).
 
-### Phase 3: CSS Minification (`--minify`)
+### Phase 3: Minification (`--minify`)
 
-Removes CSS comments and collapses whitespace. JavaScript is **not** minified — regex-based JS minification would break already-minified libraries (e.g., `https://` looks like a `//` comment to a regex).
+Removes CSS comments and collapses whitespace. JavaScript is not minified — regex-based minification breaks already-minified libraries.
 
 ### Phase 4: Compression or Encryption
 
-**Compression** (`--compress`): Gzip compresses the entire HTML, base64 encodes it, and wraps it in a minimal bootstrap page with a loading spinner. The browser decompresses using the native [DecompressionStream API](https://developer.mozilla.org/en-US/docs/Web/API/DecompressionStream).
+**Compression** uses the browser's native [DecompressionStream API](https://developer.mozilla.org/en-US/docs/Web/API/DecompressionStream).
 
-**Encryption** (`--password`):
-1. Optionally gzip the content (`--compress`)
-2. Prepend JSON metadata (expiry date) to the content
-3. Generate random salt (16 bytes) and IV (12 bytes)
-4. Derive a 256-bit key using PBKDF2 (100,000 iterations, SHA-256)
-5. Encrypt with AES-256-GCM
-6. Base64-encode the result: `salt(16) | iv(12) | tag(16) | ciphertext`
-7. Wrap in an HTML page with a password prompt
+**Encryption** derives a key with PBKDF2 (100k iterations, SHA-256), encrypts with AES-256-GCM, and wraps the result in an HTML page with a password prompt. Decryption uses the browser's [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API).
 
-Decryption happens in the browser using the [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API) — the recipient needs only a browser, no software installation.
+## Examples
 
-## SolidHTML vs Alternatives
+### Client report with encryption and expiry
 
-| | SolidHTML | Quarto `embed-resources` | PDF | ZIP + HTML |
-|---|---|---|---|---|
-| Single file | ✅ Always works | ❌ Often broken | ✅ | ❌ |
-| Interactive charts | ✅ Plotly, D3, etc. | ✅ | ❌ Static only | ✅ |
-| Sortable tables | ✅ DataTables, etc. | ✅ | ❌ | ✅ |
-| Works offline | ✅ | Partial | ✅ | ✅ |
-| Compression | ✅ 50-70% | ❌ | ❌ | ✅ |
-| Encryption | ✅ AES-256-GCM | ❌ | ⚠️ Easily cracked | ❌ |
-| Expiry dates | ✅ Tamper-proof | ❌ | ❌ | ❌ |
-| No install for viewer | ✅ Browser only | ✅ | ✅ | ❌ Need to unzip |
-| Offline CDN | ✅ `--fetch-external` | ❌ | N/A | ❌ |
+```bash
+quarto render quarterly_analysis.py
+python fathtml.py quarterly_analysis.html \
+    --fetch-external --compress --password Q3-Report-2025 --expires 30d
+# Send by email, share password via separate channel
+```
+
+### Portable dashboard
+
+```bash
+python fathtml.py dashboard.html --fetch-external --compress
+# 8 MB → 2.5 MB, works offline
+```
+
+### Standalone fix for Quarto output
+
+```bash
+python fathtml.py report.html
+rm -rf report_files/
+```
+
+## How is this different from SingleFile / Monolith?
+
+Tools like [SingleFile](https://github.com/gildas-lormeau/SingleFile) (browser extension) and [Monolith](https://github.com/Y2Z/monolith) (CLI) capture existing web pages as single HTML files. They are designed to archive pages you visit.
+
+fathtml solves a different problem — it processes HTML that you generate yourself (Quarto, Jupyter, R Markdown) and makes it truly self-contained. On top of resource embedding, it adds gzip compression, AES-256 encryption, and document expiry — features that archiving tools don't provide.
+
+| | fathtml | SingleFile / Monolith |
+|---|---|---|
+| Purpose | Post-process your own HTML output | Archive any web page |
+| Compression | Yes (gzip, 50-70% reduction) | No |
+| Encryption | Yes (AES-256-GCM) | No |
+| Expiry dates | Yes (tamper-proof) | No |
+| Input | Local HTML files you generate | Live web pages |
 
 ## Browser Compatibility
 
-| Feature | Chrome | Firefox | Safari | Edge |
-|---|---|---|---|---|
-| Basic (embed only) | ✅ All | ✅ All | ✅ All | ✅ All |
-| Compression (`--compress`) | ✅ 80+ | ✅ 113+ | ✅ 16.4+ | ✅ 80+ |
-| Encryption (`--password`) | ✅ 37+ | ✅ 34+ | ✅ 11+ | ✅ 79+ |
-
-## Real-World Examples
-
-### Data Science Report for a Client
-```bash
-quarto render quarterly_analysis.py
-python solidhtml.py quarterly_analysis.html \
-    --fetch-external --compress --password Q3-Report-2025 --expires 30d
-# → Send quarterly_analysis.html by email
-# → Share password via separate channel (Slack, SMS, etc.)
-# → Client opens in browser, enters password, sees interactive report
-# → After 30 days: "This document has expired"
-```
-
-### Team Dashboard (No Encryption, Just Portable)
-```bash
-python solidhtml.py dashboard.html --fetch-external --compress
-# → 8 MB dashboard becomes 2.5 MB
-# → Attach to email or Slack — no zip needed
-# → Works offline on a plane, in a meeting room, anywhere
-```
-
-### Confidential Research
-```bash
-python solidhtml.py research.html --fetch-external --minify --compress \
-    --password "correct-horse-battery-staple" --expires 2025-12-31 --no-print
-# → AES-256-GCM encrypted, compressed, expires end of year
-# → Recipient opens file.html?key=correct-horse-battery-staple
-```
-
-### Quick Fix for Broken Quarto Output
-```bash
-# What embed-resources: true should do but doesn't
-python solidhtml.py report.html
-rm -rf report_files/
-# → Done. report.html now actually works as a standalone file.
-```
+| Feature     | Chrome | Firefox | Safari | Edge  |
+| ----------- | ------ | ------- | ------ | ----- |
+| Embed only  | All    | All     | All    | All   |
+| Compression | 80+    | 113+    | 16.4+  | 80+   |
+| Encryption  | 37+    | 34+     | 11+    | 79+   |
 
 ## Security Notes
 
-- **Encryption is real**: AES-256-GCM with PBKDF2 key derivation (100k iterations). Without the password, the content is cryptographically inaccessible — not obfuscation, not encoding, real encryption.
-- **Expiry is tamper-proof**: The expiry date lives inside the encrypted payload. It can't be viewed or modified without the password.
-- **No server needed**: Everything happens in the browser. The HTML file never contacts any server.
-- **Save As is not blocked**: Once decrypted, the content is displayed in the browser and can be saved. This is intentional — if a browser can render it, it can save it. The protection secures the file at rest and during transmission, not the displayed content.
-- **URL key convenience**: `file.html?key=secret` lets you share a clickable link, but the password will appear in browser history. For sensitive data, have the recipient type the password manually.
+- Encryption uses AES-256-GCM with PBKDF2 — standard cryptographic primitives.
+- Expiry dates are inside the encrypted payload and cannot be modified without the password.
+- No server is contacted. Everything runs in the browser.
+- Once decrypted, content is visible in the browser and can be saved. The protection covers the file at rest and during transmission.
+- The URL key parameter (`?key=secret`) is convenient but appears in browser history.
 
 ## Project
 
-- **Author**: Vibe-coded with Claude then audited and tested
+This project started as a practical solution for sharing self-contained HTML reports and evolved into a more general-purpose tool through iterative development with Claude (Anthropic).
+
+- **Author**: Tomaž Košmrlj
 - **License**: MIT
 - **Contributions**: Issues, PRs, and ideas are welcome.
